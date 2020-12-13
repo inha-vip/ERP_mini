@@ -1,0 +1,160 @@
+x: 111.234617124 y: 86.8584576878
+this is first time
+press x (Recommended to enter negative values):press y (Recommended to enter negative values):start_lane: 0100
+goal_lane: 1413
+8.0
+8.0
+open_set key: dict_keys(['10'])
+closed_set key: dict_keys(['00'])
+------------------------------------------------------------
+xxxxxxxxxx
+selected_lanelet: 0010
+cur id: 10
+xxxxxxxxxx
+8.0
+8.0
+#####################case sort#######################
+case3: update previous values
+open set key: dict_keys(['20'])
+lane: 1020 node: 20 before update: 8.1
+new lane: 1020 selected_lane: 0010
+0010 <-selected_lane g_cost: 7.9
+lane 1020 g cost: 16.0
+20 after update: new g_cost of 1020 : 16.0
+case3: update previous values
+open set key: dict_keys(['20', '11'])
+lane: 1011 node: 11 before update: 8.0
+new lane: 1011 selected_lane: 0010
+0010 <-selected_lane g_cost: 7.9
+lane 1011 g cost: 15.9
+11 after update: new g_cost of 1011 : 15.9
+------------------------------
+open_set key check: dict_keys(['20', '11'])
+closed_set key check: dict_keys(['00', '10'])
+x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-
+xxxxxxxxxx
+selected_lanelet: 1011
+cur id: 11
+xxxxxxxxxx
+8.0
+8.0
+#####################case sort#######################
+case3: update previous values
+open set key: dict_keys(['20', '01'])
+lane: 1101 node: 01 before update: 7.9
+new lane: 1101 selected_lane: 1011
+1011 <-selected_lane g_cost: 8.0
+lane 1101 g cost: 15.9
+01 after update: new g_cost of 1101 : 15.9
+case3: update previous values
+open set key: dict_keys(['20', '01', '21'])
+lane: 1121 node: 21 before update: 7.9
+new lane: 1121 selected_lane: 1011
+1011 <-selected_lane g_cost: 8.0
+lane 1121 g cost: 15.9
+21 after update: new g_cost of 1121 : 15.9
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '12'])
+lane: 1112 node: 12 before update: 7.9
+new lane: 1112 selected_lane: 1011
+1011 <-selected_lane g_cost: 8.0
+lane 1112 g cost: 15.9
+12 after update: new g_cost of 1112 : 15.9
+------------------------------
+open_set key check: dict_keys(['20', '01', '21', '12'])
+closed_set key check: dict_keys(['00', '10', '11'])
+x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-
+xxxxxxxxxx
+selected_lanelet: 1112
+cur id: 12
+xxxxxxxxxx
+8.0
+8.0
+#####################case sort#######################
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02'])
+lane: 1202 node: 02 before update: 8.0
+new lane: 1202 selected_lane: 1112
+1112 <-selected_lane g_cost: 7.9
+lane 1202 g cost: 15.9
+02 after update: new g_cost of 1202 : 15.9
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '13'])
+lane: 1213 node: 13 before update: 7.9
+new lane: 1213 selected_lane: 1112
+1112 <-selected_lane g_cost: 7.9
+lane 1213 g cost: 15.8
+13 after update: new g_cost of 1213 : 15.8
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '13', '22'])
+lane: 1222 node: 22 before update: 7.9
+new lane: 1222 selected_lane: 1112
+1112 <-selected_lane g_cost: 7.9
+lane 1222 g cost: 15.8
+22 after update: new g_cost of 1222 : 15.8
+------------------------------
+open_set key check: dict_keys(['20', '01', '21', '02', '13', '22'])
+closed_set key check: dict_keys(['00', '10', '11', '12'])
+x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-
+xxxxxxxxxx
+selected_lanelet: 1213
+cur id: 13
+xxxxxxxxxx
+8.0
+8.0
+#####################case sort#######################
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '22', '03'])
+lane: 1303 node: 03 before update: 8.0
+new lane: 1303 selected_lane: 1213
+1213 <-selected_lane g_cost: 7.9
+lane 1303 g cost: 15.9
+03 after update: new g_cost of 1303 : 15.9
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '22', '03', '14'])
+lane: 1314 node: 14 before update: 7.9
+new lane: 1314 selected_lane: 1213
+1213 <-selected_lane g_cost: 7.9
+lane 1314 g cost: 15.8
+14 after update: new g_cost of 1314 : 15.8
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '22', '03', '14', '23'])
+lane: 1323 node: 23 before update: 7.7
+new lane: 1323 selected_lane: 1213
+1213 <-selected_lane g_cost: 7.9
+lane 1323 g cost: 15.600000000000001
+23 after update: new g_cost of 1323 : 15.600000000000001
+------------------------------
+open_set key check: dict_keys(['20', '01', '21', '02', '22', '03', '14', '23'])
+closed_set key check: dict_keys(['00', '10', '11', '12', '13'])
+x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-
+xxxxxxxxxx
+selected_lanelet: 1314
+cur id: 14
+xxxxxxxxxx
+8.0
+8.0
+#####################case sort#######################
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '22', '03', '23', '04'])
+lane: 1404 node: 04 before update: 8.0
+new lane: 1404 selected_lane: 1314
+1314 <-selected_lane g_cost: 7.9
+lane 1404 g cost: 15.9
+04 after update: new g_cost of 1404 : 15.9
+case3: update previous values
+open set key: dict_keys(['20', '01', '21', '02', '22', '03', '23', '04', '24'])
+lane: 1424 node: 24 before update: 7.800000000000001
+new lane: 1424 selected_lane: 1314
+1314 <-selected_lane g_cost: 7.9
+lane 1424 g cost: 15.700000000000001
+24 after update: new g_cost of 1424 : 15.700000000000001
+------------------------------
+open_set key check: dict_keys(['20', '01', '21', '02', '22', '03', '23', '04', '24'])
+closed_set key check: dict_keys(['00', '10', '11', '12', '13', '14'])
+x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-
+finish GPP
+len f_x: 563
+x: 111.181525915 y: 86.8695555889
+this is first time
+press x (Recommended to enter negative values):
