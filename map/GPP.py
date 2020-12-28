@@ -6,14 +6,18 @@ import matplotlib.pyplot as plt
 
 class Global_planner:
 
-    def __init__(self, start_x, start_y, start_yaw):
+    def __init__(self, start_x, start_y, start_yaw, goal_x, goal_y, goal_lane):
         self.start_x = start_x
         self.start_y = start_y
         self.start_yaw = start_yaw
+        # self.goal_x, self.goal_y = goal_x, goal_y
+        # self.goal_idx = goal_idx
+        self.goal_lane = goal_lane
         self.goal_x, self.goal_y = self.goal_pt()
         self.files = glob.glob("*.csv")
         self.lane_list = []
         self.locked_lane = ''
+        print('GPP on')
 
 
 
@@ -59,246 +63,735 @@ class Global_planner:
                     globals()['Lane{}'.format(tmp_name)]['s'].append(float(line[4]))
                     globals()['Lane{}'.format(tmp_name)]['g_cost'] = globals()['Lane{}'.format(tmp_name)]['s'][-1]
 
-                plt.scatter(globals()['Lane{}'.format(tmp_name)]['x'], globals()['Lane{}'.format(tmp_name)]['y'], marker='.')
+                # plt.scatter(globals()['Lane{}'.format(tmp_name)]['x'], globals()['Lane{}'.format(tmp_name)]['y'], marker='.')
+                # plt.text(globals()['Lane{}'.format(tmp_name)]['x'][len(globals()['Lane{}'.format(tmp_name)]['x'])//2] , globals()['Lane{}'.format(tmp_name)]['y'][len(globals()['Lane{}'.format(tmp_name)]['y'])//2], tmp_name)
+            
             map_file.close()
-
+        # plt.show()
        
         
             
+        # Lane0001['pre_lane'].append('1000')
+        # Lane0001['next_lane'].append('0102')
+        # Lane0001['next_lane'].append('0111')
+         
+         
+        # Lane0010['pre_lane'].append('0100')
+        # Lane0010['next_lane'].append('1020')
+        # Lane0010['next_lane'].append('1011')
+         
+         
+        # Lane1424['pre_lane'].append('0414')
+        # Lane1424['pre_lane'].append('1314')
+        # Lane1424['next_lane'].append('2423')
+         
+        # Lane2324['pre_lane'].append('1323')
+        # Lane2324['pre_lane'].append('2223')
+        # Lane2324['next_lane'].append('2414')
+         
+         
+        # Lane0102['pre_lane'].append('0001') 
+        # Lane0102['pre_lane'].append('1101')
+        # Lane0102['next_lane'].append('0203')
+        # Lane0102['next_lane'].append('0212')
+         
+        # Lane0203['pre_lane'].append('1202') 
+        # Lane0203['pre_lane'].append('0102')
+        # Lane0203['next_lane'].append('0304')
+        # Lane0203['next_lane'].append('0313')
+         
+        # Lane0304['pre_lane'].append('0203') 
+        # Lane0304['pre_lane'].append('1303')
+        # Lane0304['next_lane'].append('0414')
+         
+        # Lane1011['pre_lane'].append('0010') 
+        # Lane1011['pre_lane'].append('2010') 
+        # Lane1011['next_lane'].append('1101')
+        # Lane1011['next_lane'].append('1121')
+        # Lane1011['next_lane'].append('1112')
+         
+        # Lane1112['pre_lane'].append('0111')
+        # Lane1112['pre_lane'].append('1011') 
+        # Lane1112['pre_lane'].append('2111') 
+        # Lane1112['next_lane'].append('1202')
+        # Lane1112['next_lane'].append('1213')
+        # Lane1112['next_lane'].append('1222')
+         
+        # Lane1213['pre_lane'].append('0212')
+        # Lane1213['pre_lane'].append('1112') 
+        # Lane1213['pre_lane'].append('2212') 
+        # Lane1213['next_lane'].append('1303')
+        # Lane1213['next_lane'].append('1314')
+        # Lane1213['next_lane'].append('1323')
+         
+        # Lane1314['pre_lane'].append('0313')
+        # Lane1314['pre_lane'].append('1213') 
+        # Lane1314['pre_lane'].append('2313') 
+        # Lane1314['next_lane'].append('1404')
+        # Lane1314['next_lane'].append('1424')
+         
+        # Lane2021['pre_lane'].append('1020')
+        # Lane2021['next_lane'].append('2111')
+        # Lane2021['next_lane'].append('2122')
+         
+        # Lane2122['pre_lane'].append('1121')
+        # Lane2122['pre_lane'].append('2021')
+        # Lane2122['next_lane'].append('2212')
+        # Lane2122['next_lane'].append('2223')
+         
+        # Lane2223['pre_lane'].append('1222')
+        # Lane2223['pre_lane'].append('2122')
+        # Lane2223['next_lane'].append('2313')
+        # Lane2223['next_lane'].append('2324')
+         
+        # Lane1020['pre_lane'].append('1110')
+        # Lane1020['pre_lane'].append('0010')
+        # Lane1020['next_lane'].append('2021')
+         
+        # Lane0111['pre_lane'].append('0001')
+        # Lane0111['pre_lane'].append('0201')
+        # Lane0111['next_lane'].append('1112')
+        # Lane0111['next_lane'].append('1121')
+        # Lane0111['next_lane'].append('1110')
+         
+        # Lane0212['pre_lane'].append('0102')
+        # Lane0212['pre_lane'].append('0302')
+        # Lane0212['next_lane'].append('1213')
+        # Lane0212['next_lane'].append('1222')
+        # Lane0212['next_lane'].append('1211')
+         
+        # Lane0313['pre_lane'].append('0203')
+        # Lane0313['pre_lane'].append('0403')
+        # Lane0313['next_lane'].append('1314')
+        # Lane0313['next_lane'].append('1323')
+        # Lane0313['next_lane'].append('1312')
+         
+        # Lane0414['pre_lane'].append('0304')
+        # Lane0414['next_lane'].append('1413')
+        # Lane0313['next_lane'].append('1424')
+         
+        # Lane1121['pre_lane'].append('0111')
+        # Lane1121['pre_lane'].append('1011')
+        # Lane1121['pre_lane'].append('1211')
+        # Lane1121['next_lane'].append('2122')
+        # Lane1121['next_lane'].append('2120')
+         
+        # Lane1222['pre_lane'].append('0212')
+        # Lane1222['pre_lane'].append('1312')
+        # Lane1222['pre_lane'].append('1112')
+        # Lane1222['next_lane'].append('2223')
+        # Lane1222['next_lane'].append('2221')
+         
+        # Lane1323['pre_lane'].append('0313')
+        # Lane1323['pre_lane'].append('1213')
+        # Lane1323['pre_lane'].append('1413')
+        # Lane1323['next_lane'].append('2324')
+        # Lane1323['next_lane'].append('2322')
+         
+         
+        # #BLUELANE
+        # Lane1000['pre_lane'].append('1110')
+        # Lane1000['pre_lane'].append('2010')
+        # Lane1000['next_lane'].append('0001')
+         
+        # Lane2010['pre_lane'].append('2120')
+        # Lane2010['next_lane'].append('1011')
+        # Lane2010['next_lane'].append('1000')
+         
+        # Lane2120['pre_lane'].append('2221')
+        # Lane2120['pre_lane'].append('1121')
+        # Lane2120['next_lane'].append('2010')
+         
+        # Lane1110['pre_lane'].append('0111')
+        # Lane1110['pre_lane'].append('1211')
+        # Lane1110['pre_lane'].append('2111')
+        # Lane1110['next_lane'].append('1020')
+        # Lane1110['next_lane'].append('1000')
+         
+        # Lane0100['pre_lane'].append('1101')
+        # Lane0100['pre_lane'].append('0201')
+        # Lane0100['next_lane'].append('0010')
+         
+        # Lane1101['pre_lane'].append('1211')
+        # Lane1101['pre_lane'].append('2111')
+        # Lane1101['pre_lane'].append('1011')
+        # Lane1101['next_lane'].append('0102')
+        # Lane1101['next_lane'].append('0100')
+         
+         
+        # Lane2111['pre_lane'].append('2221')
+        # Lane2111['pre_lane'].append('2021')
+        # Lane2111['next_lane'].append('1112')
+        # Lane2111['next_lane'].append('1101')
+        # Lane2111['next_lane'].append('1110')
+         
+         
+        # Lane2221['pre_lane'].append('2322')
+        # Lane2221['pre_lane'].append('1222')
+        # Lane2221['next_lane'].append('2120')
+        # Lane2221['next_lane'].append('2111')
+         
+        # Lane1211['pre_lane'].append('0212')
+        # Lane1211['pre_lane'].append('1312')
+        # Lane1211['pre_lane'].append('2212')
+        # Lane1211['next_lane'].append('1101')
+        # Lane1211['next_lane'].append('1121')
+        # Lane1211['next_lane'].append('1110')
+         
+        # Lane0201['pre_lane'].append('1202')
+        # Lane0201['pre_lane'].append('0302')
+        # Lane0201['next_lane'].append('0100')
+        # Lane0201['next_lane'].append('0111')
+         
+        # Lane1202['pre_lane'].append('1312')
+        # Lane1202['pre_lane'].append('2212')
+        # Lane1202['pre_lane'].append('1112')
+        # Lane1202['next_lane'].append('0203')
+        # Lane1202['next_lane'].append('0201')
+         
+        # Lane2212['pre_lane'].append('2322')
+        # Lane2212['pre_lane'].append('2122')
+        # Lane2212['next_lane'].append('1213')
+        # Lane2212['next_lane'].append('1202')
+        # Lane2212['next_lane'].append('1211')
+         
+        # Lane2322['pre_lane'].append('2423')
+        # Lane2322['pre_lane'].append('1323')
+        # Lane2322['next_lane'].append('2221')
+        # Lane2322['next_lane'].append('2212')
+         
+        # Lane1312['pre_lane'].append('2313')
+        # Lane1312['pre_lane'].append('1413')
+        # Lane1312['pre_lane'].append('0313')
+        # Lane1312['next_lane'].append('1222')
+        # Lane1312['next_lane'].append('1211')
+        # Lane1312['next_lane'].append('1202')
+         
+        # Lane0302['pre_lane'].append('1303')
+        # Lane0302['pre_lane'].append('0403')
+        # Lane0302['next_lane'].append('0212')
+        # Lane0302['next_lane'].append('0201')
+         
+        # Lane0403['pre_lane'].append('1404')
+        # Lane0403['next_lane'].append('0313')
+        # Lane0403['next_lane'].append('0302')
+         
+        # Lane2423['pre_lane'].append('1424')
+        # Lane2423['next_lane'].append('2313')
+        # Lane2423['next_lane'].append('2322')
+         
+        # Lane2414['pre_lane'].append('2324')
+        # Lane2414['next_lane'].append('1404')
+        # Lane2414['next_lane'].append('1413')
+         
+        # Lane1404['pre_lane'].append('2414')
+        # Lane1404['pre_lane'].append('1314')
+        # Lane1404['next_lane'].append('0403')
+         
+        # Lane1413['pre_lane'].append('2414')
+        # Lane1413['pre_lane'].append('0414')
+        # Lane1413['next_lane'].append('1323')
+        # Lane1413['next_lane'].append('1312')
+        # Lane1413['next_lane'].append('1303')
+         
+        # Lane1303['pre_lane'].append('1413')
+        # Lane1303['pre_lane'].append('2313')
+        # Lane1303['pre_lane'].append('1213')
+        # Lane1303['next_lane'].append('0304')
+        # Lane1303['next_lane'].append('0302')
+         
+        # Lane2313['pre_lane'].append('2423')
+        # Lane2313['pre_lane'].append('2223')
+        # Lane2313['next_lane'].append('1314')
+        # Lane2313['next_lane'].append('1303')
+        # Lane2313['next_lane'].append('1312')
+
+##################################################################
+        # connection (00<->44)
+
+        # Lane0044['pre_lane'].append('0100')
+        # Lane0044['pre_lane'].append('1000')
+        # Lane0044['next_lane'].append('4445')
+
+        # Lane4400['pre_lane'].append('4044')
+        # Lane4400['next_lane'].append('0010')
+        # Lane4400['next_lane'].append('0001')
+
+
+
+        # # road_map
+
+        # Lane3031['pre_lane'].append('3530')
+        # Lane3031['pre_lane'].append('3730')
+        # Lane3031['pre_lane'].append('3330')
+        # Lane3031['next_lane'].append('3132')
+        # Lane3031['next_lane'].append('3134')
+        # Lane3031['next_lane'].append('3136')
+
+        # Lane3132['pre_lane'].append('3031')
+        # Lane3132['next_lane'].append('3239')
+
+        # Lane3239['pre_lane'].append('3132')
+        # Lane3239['pre_lane'].append('3732')
+        # Lane3239['pre_lane'].append('3532')
+        # Lane3239['next_lane'].append('3940')
+        # Lane3239['next_lane'].append('3942')
+
+        # Lane3940['pre_lane'].append('3239')
+        # Lane3940['next_lane'].append('4044')
+
+        # Lane4044['pre_lane'].append('3940')
+        # Lane4044['pre_lane'].append('4340')
+        # Lane4044['next_lane'].append('4400')
+        # Lane4044['next_lane'].append('4445')
+
+        # Lane4445['pre_lane'].append('0044')
+        # Lane4445['pre_lane'].append('4044')
+        # Lane4445['next_lane'].append('4541')
+
+        # Lane4541['pre_lane'].append('4445')
+        # Lane4541['next_lane'].append('4142')
+        # Lane4541['next_lane'].append('4138')
+
+        # Lane4142['pre_lane'].append('4541')
+        # Lane4142['next_lane'].append('4235')
+
+        # Lane4235['pre_lane'].append('4142')
+        # Lane4235['pre_lane'].append('3942')
+        # Lane4235['next_lane'].append('3536')
+        # Lane4235['next_lane'].append('3532')
+        # Lane4235['next_lane'].append('3530')
+
+        # Lane3536['pre_lane'].append('4235')
+        # Lane3536['next_lane'].append('3637')
+
+        # Lane3637['pre_lane'].append('3536')
+        # Lane3637['pre_lane'].append('3136')
+        # Lane3637['pre_lane'].append('3336')
+        # Lane3637['next_lane'].append('3730')
+        # Lane3637['next_lane'].append('3732')
+        # Lane3637['next_lane'].append('3734')
+
+        # Lane3730['pre_lane'].append('3637')
+        # Lane3730['next_lane'].append('3031')
+
+        # Lane3334['pre_lane'].append('3833')
+        # Lane3334['next_lane'].append('3443')
+
+        # Lane3443['pre_lane'].append('3334')
+        # Lane3443['pre_lane'].append('3134')
+        # Lane3443['pre_lane'].append('3734')
+        # Lane3443['next_lane'].append('4338')
+        # Lane3443['next_lane'].append('4340')
+
+        # Lane4338['pre_lane'].append('3443')
+        # Lane4338['next_lane'].append('3833')
+
+        # Lane3833['pre_lane'].append('4338')
+        # Lane3833['pre_lane'].append('4138')
+        # Lane3833['next_lane'].append('3334')
+        # Lane3833['next_lane'].append('3336')
+        # Lane3833['next_lane'].append('3330')
+
+        # Lane3134['pre_lane'].append('3031')
+        # Lane3134['next_lane'].append('3443')
+
+        # Lane3530['pre_lane'].append('4235')
+        # Lane3530['next_lane'].append('3031')
+
+        # Lane3732['pre_lane'].append('3637')
+        # Lane3732['next_lane'].append('3239')
+
+        # Lane3336['pre_lane'].append('3833')
+        # Lane3336['next_lane'].append('3637')
+
+        # Lane3532['pre_lane'].append('4235')
+        # Lane3532['next_lane'].append('3239')
+
+        # Lane3734['pre_lane'].append('3637')
+        # Lane3734['next_lane'].append('3443')
+
+        # Lane3136['pre_lane'].append('3031')
+        # Lane3136['next_lane'].append('3637')
+
+        # Lane3330['pre_lane'].append('3833')
+        # Lane3330['next_lane'].append('3031')
+
+        # Lane4138['pre_lane'].append('4541')
+        # Lane4138['next_lane'].append('3833')
+
+        # Lane4340['pre_lane'].append('3443')
+        # Lane4340['next_lane'].append('4044')
+
+        # Lane3942['pre_lane'].append('3239')
+        # Lane3942['next_lane'].append('4235')
+
+#########################################################
+# gongteo 
+
         Lane0001['pre_lane'].append('1000')
+        Lane0001['pre_lane'].append('4400')
         Lane0001['next_lane'].append('0102')
         Lane0001['next_lane'].append('0111')
-         
-         
+
+
         Lane0010['pre_lane'].append('0100')
+        Lane0010['pre_lane'].append('4400')
         Lane0010['next_lane'].append('1020')
         Lane0010['next_lane'].append('1011')
-         
-         
+
+
+
         Lane1424['pre_lane'].append('0414')
         Lane1424['pre_lane'].append('1314')
         Lane1424['next_lane'].append('2423')
-         
+
         Lane2324['pre_lane'].append('1323')
         Lane2324['pre_lane'].append('2223')
         Lane2324['next_lane'].append('2414')
-         
-         
-        Lane0102['pre_lane'].append('0001') 
+
+
+        Lane0102['pre_lane'].append('0001')  
         Lane0102['pre_lane'].append('1101')
         Lane0102['next_lane'].append('0203')
         Lane0102['next_lane'].append('0212')
-         
-        Lane0203['pre_lane'].append('1202') 
+
+        Lane0203['pre_lane'].append('1202')  
         Lane0203['pre_lane'].append('0102')
         Lane0203['next_lane'].append('0304')
         Lane0203['next_lane'].append('0313')
-         
-        Lane0304['pre_lane'].append('0203') 
+
+        Lane0304['pre_lane'].append('0203')  
         Lane0304['pre_lane'].append('1303')
         Lane0304['next_lane'].append('0414')
-         
-        Lane1011['pre_lane'].append('0010') 
-        Lane1011['pre_lane'].append('2010') 
+
+        Lane1011['pre_lane'].append('0010')  
+        Lane1011['pre_lane'].append('2010')  
         Lane1011['next_lane'].append('1101')
         Lane1011['next_lane'].append('1121')
         Lane1011['next_lane'].append('1112')
-         
+
         Lane1112['pre_lane'].append('0111')
-        Lane1112['pre_lane'].append('1011') 
-        Lane1112['pre_lane'].append('2111') 
+        Lane1112['pre_lane'].append('1011')  
+        Lane1112['pre_lane'].append('2111')  
         Lane1112['next_lane'].append('1202')
         Lane1112['next_lane'].append('1213')
         Lane1112['next_lane'].append('1222')
-         
+
         Lane1213['pre_lane'].append('0212')
-        Lane1213['pre_lane'].append('1112') 
-        Lane1213['pre_lane'].append('2212') 
+        Lane1213['pre_lane'].append('1112')  
+        Lane1213['pre_lane'].append('2212')  
         Lane1213['next_lane'].append('1303')
         Lane1213['next_lane'].append('1314')
         Lane1213['next_lane'].append('1323')
-         
+
         Lane1314['pre_lane'].append('0313')
-        Lane1314['pre_lane'].append('1213') 
-        Lane1314['pre_lane'].append('2313') 
+        Lane1314['pre_lane'].append('1213')  
+        Lane1314['pre_lane'].append('2313')  
         Lane1314['next_lane'].append('1404')
         Lane1314['next_lane'].append('1424')
-         
-        Lane2021['pre_lane'].append('1020')
+
+        Lane2021['pre_lane'].append('1020') 
         Lane2021['next_lane'].append('2111')
         Lane2021['next_lane'].append('2122')
-         
-        Lane2122['pre_lane'].append('1121')
-        Lane2122['pre_lane'].append('2021')
+
+        Lane2122['pre_lane'].append('1121') 
+        Lane2122['pre_lane'].append('2021') 
         Lane2122['next_lane'].append('2212')
         Lane2122['next_lane'].append('2223')
-         
-        Lane2223['pre_lane'].append('1222')
-        Lane2223['pre_lane'].append('2122')
+
+        Lane2223['pre_lane'].append('1222') 
+        Lane2223['pre_lane'].append('2122') 
         Lane2223['next_lane'].append('2313')
         Lane2223['next_lane'].append('2324')
-         
-        Lane1020['pre_lane'].append('1110')
-        Lane1020['pre_lane'].append('0010')
+
+        Lane1020['pre_lane'].append('1110') 
+        Lane1020['pre_lane'].append('0010') 
         Lane1020['next_lane'].append('2021')
-         
-        Lane0111['pre_lane'].append('0001')
-        Lane0111['pre_lane'].append('0201')
+
+        Lane0111['pre_lane'].append('0001') 
+        Lane0111['pre_lane'].append('0201') 
         Lane0111['next_lane'].append('1112')
         Lane0111['next_lane'].append('1121')
         Lane0111['next_lane'].append('1110')
-         
-        Lane0212['pre_lane'].append('0102')
-        Lane0212['pre_lane'].append('0302')
+
+        Lane0212['pre_lane'].append('0102') 
+        Lane0212['pre_lane'].append('0302') 
         Lane0212['next_lane'].append('1213')
         Lane0212['next_lane'].append('1222')
         Lane0212['next_lane'].append('1211')
-         
-        Lane0313['pre_lane'].append('0203')
+
+        Lane0313['pre_lane'].append('0203') 
         Lane0313['pre_lane'].append('0403')
         Lane0313['next_lane'].append('1314')
         Lane0313['next_lane'].append('1323')
         Lane0313['next_lane'].append('1312')
-         
-        Lane0414['pre_lane'].append('0304')
+
+        Lane0414['pre_lane'].append('0304') 
         Lane0414['next_lane'].append('1413')
         Lane0313['next_lane'].append('1424')
-         
-        Lane1121['pre_lane'].append('0111')
+
+        Lane1121['pre_lane'].append('0111') 
         Lane1121['pre_lane'].append('1011')
         Lane1121['pre_lane'].append('1211')
         Lane1121['next_lane'].append('2122')
         Lane1121['next_lane'].append('2120')
-         
-        Lane1222['pre_lane'].append('0212')
+
+        Lane1222['pre_lane'].append('0212') 
         Lane1222['pre_lane'].append('1312')
         Lane1222['pre_lane'].append('1112')
         Lane1222['next_lane'].append('2223')
         Lane1222['next_lane'].append('2221')
-         
-        Lane1323['pre_lane'].append('0313')
+
+        Lane1323['pre_lane'].append('0313') 
         Lane1323['pre_lane'].append('1213')
         Lane1323['pre_lane'].append('1413')
         Lane1323['next_lane'].append('2324')
         Lane1323['next_lane'].append('2322')
-         
-         
-        #BLUELANE
+
+
+
+
+        # BLUE
         Lane1000['pre_lane'].append('1110')
         Lane1000['pre_lane'].append('2010')
         Lane1000['next_lane'].append('0001')
-         
+        Lane1000['next_lane'].append('0044')
+
         Lane2010['pre_lane'].append('2120')
         Lane2010['next_lane'].append('1011')
         Lane2010['next_lane'].append('1000')
-         
+
         Lane2120['pre_lane'].append('2221')
         Lane2120['pre_lane'].append('1121')
         Lane2120['next_lane'].append('2010')
-         
+
         Lane1110['pre_lane'].append('0111')
         Lane1110['pre_lane'].append('1211')
         Lane1110['pre_lane'].append('2111')
         Lane1110['next_lane'].append('1020')
         Lane1110['next_lane'].append('1000')
-         
+
         Lane0100['pre_lane'].append('1101')
         Lane0100['pre_lane'].append('0201')
         Lane0100['next_lane'].append('0010')
-         
+        Lane0100['next_lane'].append('0044')
+
         Lane1101['pre_lane'].append('1211')
         Lane1101['pre_lane'].append('2111')
         Lane1101['pre_lane'].append('1011')
         Lane1101['next_lane'].append('0102')
         Lane1101['next_lane'].append('0100')
-         
-         
+
+
         Lane2111['pre_lane'].append('2221')
         Lane2111['pre_lane'].append('2021')
         Lane2111['next_lane'].append('1112')
         Lane2111['next_lane'].append('1101')
         Lane2111['next_lane'].append('1110')
-         
-         
+
+
         Lane2221['pre_lane'].append('2322')
         Lane2221['pre_lane'].append('1222')
         Lane2221['next_lane'].append('2120')
         Lane2221['next_lane'].append('2111')
-         
+
         Lane1211['pre_lane'].append('0212')
         Lane1211['pre_lane'].append('1312')
         Lane1211['pre_lane'].append('2212')
         Lane1211['next_lane'].append('1101')
         Lane1211['next_lane'].append('1121')
         Lane1211['next_lane'].append('1110')
-         
+
         Lane0201['pre_lane'].append('1202')
         Lane0201['pre_lane'].append('0302')
         Lane0201['next_lane'].append('0100')
         Lane0201['next_lane'].append('0111')
-         
+
         Lane1202['pre_lane'].append('1312')
         Lane1202['pre_lane'].append('2212')
         Lane1202['pre_lane'].append('1112')
         Lane1202['next_lane'].append('0203')
         Lane1202['next_lane'].append('0201')
-         
+
         Lane2212['pre_lane'].append('2322')
         Lane2212['pre_lane'].append('2122')
         Lane2212['next_lane'].append('1213')
         Lane2212['next_lane'].append('1202')
         Lane2212['next_lane'].append('1211')
-         
+
         Lane2322['pre_lane'].append('2423')
         Lane2322['pre_lane'].append('1323')
         Lane2322['next_lane'].append('2221')
         Lane2322['next_lane'].append('2212')
-         
+
         Lane1312['pre_lane'].append('2313')
         Lane1312['pre_lane'].append('1413')
         Lane1312['pre_lane'].append('0313')
         Lane1312['next_lane'].append('1222')
         Lane1312['next_lane'].append('1211')
         Lane1312['next_lane'].append('1202')
-         
+
         Lane0302['pre_lane'].append('1303')
         Lane0302['pre_lane'].append('0403')
         Lane0302['next_lane'].append('0212')
         Lane0302['next_lane'].append('0201')
-         
+
         Lane0403['pre_lane'].append('1404')
         Lane0403['next_lane'].append('0313')
         Lane0403['next_lane'].append('0302')
-         
+
         Lane2423['pre_lane'].append('1424')
         Lane2423['next_lane'].append('2313')
         Lane2423['next_lane'].append('2322')
-         
+
         Lane2414['pre_lane'].append('2324')
         Lane2414['next_lane'].append('1404')
         Lane2414['next_lane'].append('1413')
-         
+
         Lane1404['pre_lane'].append('2414')
         Lane1404['pre_lane'].append('1314')
         Lane1404['next_lane'].append('0403')
-         
+
         Lane1413['pre_lane'].append('2414')
         Lane1413['pre_lane'].append('0414')
         Lane1413['next_lane'].append('1323')
         Lane1413['next_lane'].append('1312')
         Lane1413['next_lane'].append('1303')
-         
+
         Lane1303['pre_lane'].append('1413')
         Lane1303['pre_lane'].append('2313')
         Lane1303['pre_lane'].append('1213')
         Lane1303['next_lane'].append('0304')
         Lane1303['next_lane'].append('0302')
-         
+
         Lane2313['pre_lane'].append('2423')
         Lane2313['pre_lane'].append('2223')
         Lane2313['next_lane'].append('1314')
         Lane2313['next_lane'].append('1303')
         Lane2313['next_lane'].append('1312')
+
+
+
+        # # connection (00<->44)
+
+        # Lane0044['pre_lane'].append('0100')
+        # Lane0044['pre_lane'].append('1000')
+        # Lane0044['next_lane'].append('4445')
+
+        # Lane4400['pre_lane'].append('4044')
+        # Lane4400['next_lane'].append('0010')
+        # Lane4400['next_lane'].append('0001')
+
+
+
+        # # road_map
+
+        # Lane3031['pre_lane'].append('3530')
+        # Lane3031['pre_lane'].append('3730')
+        # Lane3031['pre_lane'].append('3330')
+        # Lane3031['next_lane'].append('3132')
+        # Lane3031['next_lane'].append('3134')
+        # Lane3031['next_lane'].append('3136')
+
+        # Lane3132['pre_lane'].append('3031')
+        # Lane3132['next_lane'].append('3239')
+
+        # Lane3239['pre_lane'].append('3132')
+        # Lane3239['pre_lane'].append('3732')
+        # Lane3239['pre_lane'].append('3532')
+        # Lane3239['next_lane'].append('3940')
+        # Lane3239['next_lane'].append('3942')
+
+        # Lane3940['pre_lane'].append('3239')
+        # Lane3940['next_lane'].append('4044')
+
+        # Lane4044['pre_lane'].append('3940')
+        # Lane4044['pre_lane'].append('4340')
+        # Lane4044['next_lane'].append('4400')
+        # Lane4044['next_lane'].append('4445')
+
+        # Lane4445['pre_lane'].append('0044')
+        # Lane4445['pre_lane'].append('4044')
+        # Lane4445['next_lane'].append('4541')
+
+        # Lane4541['pre_lane'].append('4445')
+        # Lane4541['next_lane'].append('4142')
+        # Lane4541['next_lane'].append('4138')
+
+        # Lane4142['pre_lane'].append('4541')
+        # Lane4142['next_lane'].append('4235')
+
+        # Lane4235['pre_lane'].append('4142')
+        # Lane4235['pre_lane'].append('3942')
+        # Lane4235['next_lane'].append('3536')
+        # Lane4235['next_lane'].append('3532')
+        # Lane4235['next_lane'].append('3530')
+
+        # Lane3536['pre_lane'].append('4235')
+        # Lane3536['next_lane'].append('3637')
+
+        # Lane3637['pre_lane'].append('3536')
+        # Lane3637['pre_lane'].append('3136')
+        # Lane3637['pre_lane'].append('3336')
+        # Lane3637['next_lane'].append('3730')
+        # Lane3637['next_lane'].append('3732')
+        # Lane3637['next_lane'].append('3734')
+
+        # Lane3730['pre_lane'].append('3637')
+        # Lane3730['next_lane'].append('3031')
+
+        # Lane3334['pre_lane'].append('3833')
+        # Lane3334['next_lane'].append('3443')
+
+        # Lane3443['pre_lane'].append('3334')
+        # Lane3443['pre_lane'].append('3134')
+        # Lane3443['pre_lane'].append('3734')
+        # Lane3443['next_lane'].append('4338')
+        # Lane3443['next_lane'].append('4340')
+
+        # Lane4338['pre_lane'].append('3443')
+        # Lane4338['next_lane'].append('3833')
+
+        # Lane3833['pre_lane'].append('4338')
+        # Lane3833['pre_lane'].append('4138')
+        # Lane3833['next_lane'].append('3334')
+        # Lane3833['next_lane'].append('3336')
+        # Lane3833['next_lane'].append('3330')
+
+        # Lane3134['pre_lane'].append('3031')
+        # Lane3134['next_lane'].append('3443')
+
+        # Lane3530['pre_lane'].append('4235')
+        # Lane3530['next_lane'].append('3031')
+
+        # Lane3732['pre_lane'].append('3637')
+        # Lane3732['next_lane'].append('3239')
+
+        # Lane3336['pre_lane'].append('3833')
+        # Lane3336['next_lane'].append('3637')
+
+        # Lane3532['pre_lane'].append('4235')
+        # Lane3532['next_lane'].append('3239')
+
+        # Lane3734['pre_lane'].append('3637')
+        # Lane3734['next_lane'].append('3443')
+
+        # Lane3136['pre_lane'].append('3031')
+        # Lane3136['next_lane'].append('3637')
+
+        # Lane3330['pre_lane'].append('3833')
+        # Lane3330['next_lane'].append('3031')
+
+        # Lane4138['pre_lane'].append('4541')
+        # Lane4138['next_lane'].append('3833')
+
+        # Lane4340['pre_lane'].append('3443')
+        # Lane4340['next_lane'].append('4044')
+
+        # Lane3942['pre_lane'].append('3239')
+        # Lane3942['next_lane'].append('4235')
+
 
 
     def select_lanelet(self, x, y, yaw, goal):
@@ -314,13 +807,16 @@ class Global_planner:
                         cur_lane = globals()['Lane{}'.format(lane_num)] 
                         self.locked_lane  = lane_num[2:4] + lane_num[0:2]
                     else:
-                        th =  globals()['Lane{}'.format(lane_num)]['yaw'][i]
-                        if abs(th - yaw) < 90:
-                            cur_lane = globals()['Lane{}'.format(lane_num)]
-                            self.locked_lane  = lane_num[2:4] + lane_num[0:2]
+                        if lane_num[2:4] + lane_num[0:2] in self.lane_list:
+                            th =  globals()['Lane{}'.format(lane_num)]['yaw'][i]
+                            if abs(th - yaw) < 90:
+                                cur_lane = globals()['Lane{}'.format(lane_num)]
+                                self.locked_lane  = lane_num[2:4] + lane_num[0:2]
+                            else:
+                                cur_lane = globals()['Lane{}'.format(lane_num[2:4] + lane_num[0:2])]
+                                self.locked_lane  = lane_num
                         else:
-                            cur_lane = globals()['Lane{}'.format(lane_num[2:4] + lane_num[0:2])]
-                            self.locked_lane  = lane_num
+                            cur_lane = globals()['Lane{}'.format(lane_num)]
 
                     
                     min_idx = i
@@ -344,6 +840,7 @@ class Global_planner:
 
 
     def planning(self, sx, sy, syaw, gx, gy):
+        print(self.lane_list)
 
 
         start_lane , s_min_idx = self.select_lanelet(sx, sy, syaw, goal=False)
@@ -351,8 +848,11 @@ class Global_planner:
         head_lane = [start_lane['x'][s_min_idx:] , start_lane['y'][s_min_idx:], start_lane['yaw'][s_min_idx:], 
         start_lane['k'][s_min_idx:], start_lane['s'][s_min_idx:] , start_lane['id']]
 
-        
-        
+        # print('goal lane #',self.goal_lane)
+        # goal_lane = globals()['Lane{}'.format(self.goal_lane)]
+        # print('goal lane x:', goal_lane['x'])
+        # print('goal lane:', goal_lane)
+        # g_min_idx = goal_lane['x'].index(self.goal_x)
         goal_lane , g_min_idx = self.select_lanelet(gx, gy, syaw, goal=True)
         g_node= self.pre_Node(goal_lane)
         tail_lane = [goal_lane['x'][:g_min_idx] , goal_lane['y'][:g_min_idx] , goal_lane['yaw'][:g_min_idx], 
@@ -366,17 +866,19 @@ class Global_planner:
         closed_set[s_node['node_id']] = s_node
 
 
-        # print('s_node:',s_node)
+        print('s_node:',s_node)
         # print(self.lane_list)
 
         for lane in self.lane_list:
             # print('lane:', lane[0:2])
             if s_node['node_id'] == lane[0:2]:
                 open_set[lane[2:4]] = self.next_Node(globals()['Lane{}'.format(lane)])
-        
+        print('start lane:', start_lane)
+        print('self.pre_Node(start_lane):', self.pre_Node(start_lane))
+        print('open set id:', open_set)
         del open_set[self.pre_Node(start_lane)['node_id']]
        
-        # print('open_set:',open_set)
+        print('open_set:',open_set)
         print('open_set key:', open_set.keys())
         print('closed_set key:', closed_set.keys())
         print('-'*60)
@@ -409,9 +911,9 @@ class Global_planner:
             
             closed_set[cur_node_id] = self.next_Node(globals()['Lane{}'.format(open_set[cur_node_id]['lane_name'])])
     
-            print(self.next_Node(Lane1011)['g_cost'])
+            # print(self.next_Node(Lane1011)['g_cost'])
             del open_set[cur_node_id]
-            print(self.next_Node(Lane1011)['g_cost'])
+            # print(self.next_Node(Lane1011)['g_cost'])
             
             print('#####################case sort#######################')
             for lane in globals()['Lane{}'.format(selected_lane)]['next_lane']:
@@ -431,7 +933,7 @@ class Global_planner:
                     old_val = open_set[tmp_id]['g_cost']
                     new_val = self.next_Node(globals()['Lane{}'.format(selected_lane)])['g_cost'] + self.next_Node(new_lane)['g_cost']
                     
-                    print('old_val',  old_val, 'new_val:', new_val)
+                    # print('old_val',  old_val, 'new_val:', new_val)
                     if new_val <= old_val:
 
                         del open_set[tmp_id]
@@ -442,16 +944,16 @@ class Global_planner:
                 else:
                     print('case3: update previous values')
                     open_set[lane[2:4]] = self.next_Node(new_lane)
-                    print('open set key:', open_set.keys())
-                    print('lane:', lane ,'node:', lane[2:4],'before update:', open_set[lane[2:4]]['g_cost'])
-                    print('new lane:', lane, 'selected_lane:', selected_lane)
-                    print(selected_lane,'<-selected_lane g_cost:', self.next_Node(globals()['Lane{}'.format(selected_lane)])['g_cost'])
+                    # print('open set key:', open_set.keys())
+                    # print('lane:', lane ,'node:', lane[2:4],'before update:', open_set[lane[2:4]]['g_cost'])
+                    # print('new lane:', lane, 'selected_lane:', selected_lane)
+                    # print(selected_lane,'<-selected_lane g_cost:', self.next_Node(globals()['Lane{}'.format(selected_lane)])['g_cost'])
                     open_set[lane[2:4]]['g_cost']  += globals()['Lane{}'.format(selected_lane)]['g_cost']
                     
                     globals()['Lane{}'.format(lane)]['g_cost'] = open_set[lane[2:4]]['g_cost'] 
                     
-                    print('lane',  lane ,  'g cost:',  globals()['Lane{}'.format(lane)]['g_cost'])
-                    print(lane[2:4], 'after update:', 'new g_cost of', lane, ':', globals()['Lane{}'.format(lane)]['g_cost'])
+                    # print('lane',  lane ,  'g cost:',  globals()['Lane{}'.format(lane)]['g_cost'])
+                    # print(lane[2:4], 'after update:', 'new g_cost of', lane, ':', globals()['Lane{}'.format(lane)]['g_cost'])
                     
                 
                     
@@ -462,11 +964,11 @@ class Global_planner:
                 # print('new_g_cost', lane, ':', open_set[lane[2:4]]['g_cost'])
 
 
-            print('-'*30)
-            #print('open_set check:',open_set)
-            print('open_set key check:',open_set.keys())
-            print('closed_set key check:', closed_set.keys())
-            print('x-'*20)
+            # print('-'*30)
+            # print('open_set check:',open_set)
+            # print('open_set key check:',open_set.keys())
+            # print('closed_set key check:', closed_set.keys())
+            # print('x-'*20)
 
         f_x, f_y, f_yaw, f_k, f_s = self.calc_final_path(cur_node_id, closed_set, head_lane, tail_lane)
            
@@ -475,17 +977,17 @@ class Global_planner:
         
             # way point 번호 확인용 
         
-        for i in range(int(len(f_x)/10)):
-            plt.text(f_x[i*10]+0.05, f_y[i*10]+0.05, round(f_yaw[i*10],  2))
+        # for i in range(int(len(f_x)/10)):
+        #     plt.text(f_x[i*10]+0.05, f_y[i*10]+0.05, round(f_yaw[i*10],  2))
             
-        #for i in range(int(len(f_x)/10)):
-        #    plt.text(f_x[i*10]+0.05, f_y[i*10]+0.05, i)
+        # for i in range(int(len(f_x))):
+        #    plt.text(f_x[i]+0.05, f_y[i]+0.05, i)
         # plt.text(f_x[0]+0.05, f_y[0]+0.05,  'start' ,  fontsize = 10)
         # plt.text(f_x[-1]+0.05, f_y[-1]+0.05,  'goal' ,  fontsize = 10)
         # plt.text(f_x[50]-0.05, f_y[50]-0.05, 'first yaw: {}'.format(f_yaw[0])   ,  fontsize = 10)
         # plt.text(f_x[150]-0.05, f_y[150]-0.05, '150 yaw{}'.format(f_yaw[100])   ,  fontsize = 10)
         # plt.text(f_x[0]-1, f_y[0]-1 , 'start_yaw: {}'.format(self.start_yaw)   ,  fontsize = 10)
-        # plt.show()
+        plt.show()
         
 
         return f_x, f_y, f_yaw, f_k, f_s
