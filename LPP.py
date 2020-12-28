@@ -1,43 +1,56 @@
-#-*- coding:utf-8 -*-
-import rospy
-import roslib
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import copy
-import math
+from math import cos
+from math import sin
+from math import pi
+from math import atan2
+from math import hypot
+import matplotlib.pyplot as plt
 import sys
 import os
-import time
-
-from std_msgs.msg import Float32MultiArray
-#from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
-
+#'''
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/QuinticPolynomialsPlanner/")
+                "/../QuinticPolynomialsPlanner/")
+#'''
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
-                "/CubicSpline/")
-
+                "/../CubicSpline/")
+from quintic_polynomials_planner import QuinticPolynomial
+#'''
 try:
     from quintic_polynomials_planner import QuinticPolynomial
     import cubic_spline_planner
 except ImportError:
     raise
-
-
+#'''
+#SIM_LOOP = 10
 
 # Parameter
-MAX_SPEED = 50.0 / 3.6  # maximum speed [m/s]
+# MAX_SPEED = 50.0 / 3.6  # maximum speed [m/s]
+# MAX_ACCEL = 2.0  # maximum acceleration [m/ss]
+# MAX_CURVATURE = 1.0  # maximum curvature [1/m]
+# MAX_ROAD_WIDTH = 7.0  # maximum road width [m]
+# D_ROAD_W = 1.0  # road width sampling length [m]
+# DT = 0.2  # time tick [s]
+# MAX_T = 5.0  # max prediction time [m]
+# MIN_T = 4.0  # min prediction time [m]
+# TARGET_SPEED = 30.0 / 3.6  # target speed [m/s]
+# D_T_S = 5.0 / 3.6  # target speed sampling length [m/s]
+# N_S_SAMPLE = 1  # sampling number of target speed
+# ROBOT_RADIUS = 2.0  # robot radius [m]
+
+MAX_SPEED = 20.0 / 3.6  # maximum speed [m/s]
 MAX_ACCEL = 2.0  # maximum acceleration [m/ss]
-MAX_CURVATURE = 1.0  # maximum curvature [1/m]
-MAX_ROAD_WIDTH = 7.0  # maximum road width [m]
-D_ROAD_W = 1.0  # road width sampling length [m]
-DT = 0.2  # time tick [s]
+MAX_CURVATURE = 3  # maximum curvature [1/m]
+MAX_ROAD_WIDTH = 2.5  # maximum road width [m]
+D_ROAD_W = 1  # road width sampling length [m]
+DT = 1.0  # time tick [s]
 MAX_T = 5.0  # max prediction time [m]
-MIN_T = 4.0  # min prediction time [m]
-TARGET_SPEED = 30.0 / 3.6  # target speed [m/s]
-D_T_S = 5.0 / 3.6  # target speed sampling length [m/s]
+MIN_T = 2.0  # min prediction time [m]
+# TARGET_SPEED = 0.1 / 3.6  # target speed [m/s]
+D_T_S = 1.0 / 3.6  # target speed sampling length [m/s]
 N_S_SAMPLE = 1  # sampling number of target speed
-ROBOT_RADIUS = 2.0  # robot radius [m]
+ROBOT_RADIUS = 0.7  # robot radius [m]
 
 # cost weights
 K_J = 0.1
@@ -47,8 +60,6 @@ K_LAT = 1.0
 K_LON = 1.0
 
 show_animation = True
-
-
 
 
 class QuarticPolynomial:
@@ -115,8 +126,20 @@ class FrenetPath:
         self.c = []
 
 
-def calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0):
+def calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0, target_speed):
     frenet_paths = []
+    # target_speed = 2*0.1*math.pi*target_speed/152/2
+    target_speed = 12.0/3.6
+    # print('target speed:', target_speed)
+    # n = data
+        # N= 152
+        # t = 1
+        
+        # w = 2*math.pi*n/N/t
+        
+        # r = 0.1 #m
+        # v = r*w*3.6 #km/h
+        # output = v
 
     # generate path to each offset goal
     for di in np.arange(-MAX_ROAD_WIDTH, MAX_ROAD_WIDTH, D_ROAD_W):
@@ -135,8 +158,8 @@ def calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0):
             fp.d_ddd = [lat_qp.calc_third_derivative(t) for t in fp.t]
 
             # Longitudinal motion planning (Velocity keeping)
-            for tv in np.arange(TARGET_SPEED - D_T_S * N_S_SAMPLE,
-                                TARGET_SPEED + D_T_S * N_S_SAMPLE, D_T_S):
+            for tv in np.arange(target_speed - D_T_S * N_S_SAMPLE,
+                                target_speed + D_T_S * N_S_SAMPLE, D_T_S):
                 tfp = copy.deepcopy(fp)
                 lon_qp = QuarticPolynomial(s0, c_speed, 0.0, tv, 0.0, Ti)
 
@@ -149,7 +172,7 @@ def calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0):
                 Js = sum(np.power(tfp.s_ddd, 2))  # square of jerk
 
                 # square of diff from target speed
-                ds = (TARGET_SPEED - tfp.s_d[-1]) ** 2
+                ds = (target_speed - tfp.s_d[-1]) ** 2
 
                 tfp.cd = K_J * Jp + K_T * Ti + K_D * tfp.d[-1] ** 2
                 tfp.cv = K_J * Js + K_T * Ti + K_D * ds
@@ -159,19 +182,45 @@ def calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0):
 
     return frenet_paths
 
+def sd_to_xy(s, d, tx, ty, tyaw, tk, ts):
+    #ts = ts.tolist()
+    min_val = 99999
+    min_idx = 0
+    for i in range(len(ts)):
+        if abs(ts[i] - s) < min_val:
+            min_idx = i
+            min_val = abs(ts[i] - s)
 
-def calc_global_paths(fplist, csp):
+    s_idx = min_idx
+    #s_idx = ts.index(s)
+    x = tx[s_idx]
+    y = ty[s_idx]
+    
+    #pi = 3.14
+    #rx = x + d* math.cos((math.pi/2) + tyaw[s_idx])
+    #ry = y + d* math.sin((math.pi/2) + tyaw[s_idx])  
+    rx = x + d * cos(3.14/2 + tyaw[s_idx])
+    ry = y + d * sin(3.14/2 + tyaw[s_idx])
+    #print("rx, ry", rx, ry)
+    #print("d is ", d)
+    #print("d is ", d)
+
+    #d= round(d, 1)
+    #print("round d is", d)
+    #rx = d
+    #ry = d
+    #rx, ry = 0, 0
+    return rx, ry
+
+
+def calc_global_paths(fplist, tx, ty, tyaw, tc, ts):
+    fp = []
     for fp in fplist:
-
+        #fp = fplist[0]
         # calc global positions
         for i in range(len(fp.s)):
-            ix, iy = csp.calc_position(fp.s[i])
-            if ix is None:
-                break
-            i_yaw = csp.calc_yaw(fp.s[i])
-            di = fp.d[i]
-            fx = ix + di * math.cos(i_yaw + math.pi / 2.0)
-            fy = iy + di * math.sin(i_yaw + math.pi / 2.0)
+            fx, fy = sd_to_xy(fp.s[i], fp.d[i], tx, ty, tyaw, tc, ts)
+            # fx, fy = 0, 0
             fp.x.append(fx)
             fp.y.append(fy)
 
@@ -179,181 +228,151 @@ def calc_global_paths(fplist, csp):
         for i in range(len(fp.x) - 1):
             dx = fp.x[i + 1] - fp.x[i]
             dy = fp.y[i + 1] - fp.y[i]
-            fp.yaw.append(math.atan2(dy, dx))
-            fp.ds.append(math.hypot(dx, dy))
+            fp.yaw.append(atan2(dy, dx))
+            fp.ds.append(hypot(dx, dy))
 
         fp.yaw.append(fp.yaw[-1])
         fp.ds.append(fp.ds[-1])
-
+        #print("okok")
         # calc curvature
         for i in range(len(fp.yaw) - 1):
+            #print("okok2")
+            #fp.c.append((fp.yaw[i + 1] - fp.yaw[i]) / fp.ds[i])
             fp.c.append((fp.yaw[i + 1] - fp.yaw[i]) / fp.ds[i])
+
+
+        # print('dis:' , math.hypot(fp.x[i+1]-fp.x[i], fp.y[i+1]- fp.y[i]))
 
     return fplist
 
 
 def check_collision(fp, ob):
+    # print('ob:', ob)
     for i in range(len(ob[:, 0])):
         d = [((ix - ob[i, 0]) ** 2 + (iy - ob[i, 1]) ** 2)
              for (ix, iy) in zip(fp.x, fp.y)]
+        
+        print('d:', d)
 
         collision = any([di <= ROBOT_RADIUS ** 2 for di in d])
+        print('collision:', collision)
 
         if collision:
             return False
 
     return True
 
+def calc_coll(fp, ob):
+
+    dist = 100
+
+    for i in range(len(fp.x)-1):
+        for j in range(len(ob[:, 0])):            
+            son = (fp.y[i+1] - fp.y[i])*(ob[j][0] -fp.x[i]) + (fp.x[i+1]-fp.x[i])*(fp.y[i]-ob[j][1])
+            mom = hypot(fp.y[i+1] - fp.y[i], fp.x[i+1] - fp.x[i])
+            # son = (py2-py1)*(ob[i][0]-px1) + (px2-px1)*(py1-ob[i][1])
+            # mom = hypot(py2-py1, px2-px1)
+            dist = abs(son) / mom 
+            
+            # print(i, "th dist: ", dist)
+
+            if dist < 0.1:
+                print("COLL####################")
+                print("COLL####################")
+                print("COLL####################")
+                print("COLL####################")
+                return True
+
+    if dist >= 0.1:
+        return False
+
 
 def check_paths(fplist, ob):
     ok_ind = []
-    for i, _ in enumerate(fplist):
+    # for i, _ in enumerate(fplist):
+    for i in range(len(fplist)):
+        # print("fplist.x: ", fplist[i].x)
         if any([v > MAX_SPEED for v in fplist[i].s_d]):  # Max speed check
+            # print('number', i, 'path eliminated by MAX SPEED')
             continue
         elif any([abs(a) > MAX_ACCEL for a in
                   fplist[i].s_dd]):  # Max accel check
+            # print('number', i, 'path eliminated by MAX accel')
             continue
         elif any([abs(c) > MAX_CURVATURE for c in
                   fplist[i].c]):  # Max curvature check
+            # print('number', i, 'path eliminated by MAX CURVATURE')
             continue
-        elif not check_collision(fplist[i], ob):
+        # elif not check_collision(fplist[i], ob):
+        #     print('number', i, 'path eliminated by COLLISION')
+        #     continue
+
+        elif calc_coll(fplist[i], ob):
+            print("obstacle")
+            print('number', i, 'path eliminated by LINE collision')
             continue
 
         ok_ind.append(i)
 
     return [fplist[i] for i in ok_ind]
 
+count = 0
+tmp_list= []
 
-def frenet_optimal_planning(csp, s0, c_speed, c_d, c_d_d, c_d_dd, ob):
-    fplist = calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0)
-    fplist = calc_global_paths(fplist, csp)
+def frenet_optimal_planning(s0, c_speed, c_d, c_d_d, c_d_dd, ob, tx, ty, tyaw, tc, ts, target_speed):
+    
+    fplist = calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0, target_speed)
+    #print('x list0:', fplist[0].x)
+    fplist = calc_global_paths(fplist, tx, ty, tyaw, tc, ts)
+    print('number of fplist:', len(fplist))
+    # print("ob is ", ob)
+    # plt.plot([45.63 , -45.5451172257],[98.47, -95.4670722654])
+    # plt.plot([6.78591132663 , -6.06284527727],[15.8453863844, -11.4849896419])
+    # plt.plot([33.0, 29.0],[27.0, 29.0])
+    # plt.plot(tx, ty)
+    global tmp_list
     fplist = check_paths(fplist, ob)
 
+    # if len(fplist) != 0:
+    #     print("not none")
+    #     fplist = fplist2
+    # # print('ob x:',ob[:,0])
+    # plt.scatter(ob[:,0], ob[:,1], marker='o')
+    # if len(fplist)!=0:
+    #     print('original path')
+    #     tmp_list = fplist
+    # else:
+    #     print('previous path')
+    #     fplist = tmp_list
+    
+    
+
+    # for i in fplist:
+    #     plt.scatter(i.x,i.y)
+    #     # tmp_ob = ob.tolist()
+    #     # plt.scatter(tmp_ob[0][0], tmp_ob[0][1], marker='x')
+    #     # plt.scatter(tmp_ob[1][0], tmp_ob[1][1], marker='x')
+    #     plt.text(i.x[0], i.y[0], 'start')
+    #     # plt.text(self.control_data['cur_x'], self.control_data['cur_y'], 'cur_point')
+    #     # plt.text(i.x[-1], i.y[-1], 'goal')
+    #     plt.grid
+    # plt.show()
+
+    #print('x list2:', fplist[0].x)
+
+    # global count
     # find minimum cost path
     min_cost = float("inf")
-    best_path = None
+    best_path = fplist
+
     for fp in fplist:
         if min_cost >= fp.cf:
             min_cost = fp.cf
             best_path = fp
 
-    return best_path
+    # plt.plot(best_path.x, best_path.y)
+    # plt.text(best_path.x[0], best_path.y[0], 's')
+    # plt.show()
 
-
-def generate_target_course(x, y):
-    csp = cubic_spline_planner.Spline2D(x, y)
-    s = np.arange(0, csp.s[-1], 0.1)
-
-    rx, ry, ryaw, rk = [], [], [], []
-    for i_s in s:
-        ix, iy = csp.calc_position(i_s)
-        rx.append(ix)
-        ry.append(iy)
-        ryaw.append(csp.calc_yaw(i_s))
-        rk.append(csp.calc_curvature(i_s))
-
-    return rx, ry, ryaw, rk, csp
-
-def frenet(path):
-
-    rospy.init_node("publish_fre")
-    pubx = rospy.Publisher('/target_x', Float32MultiArray, queue_size = 1)
-    puby = rospy.Publisher('/target_y', Float32MultiArray, queue_size = 1)
-    #while not rospy.is_shutdown():
-    #path_x = "path_x : %s\n" %path.x
-    #rospy.loginfo(path_x)
-    x_tobesent=Float32MultiArray()
-    y_tobesent=Float32MultiArray()
-    x_tobesent.data=path.x
-    y_tobesent.data=path.y
-    pubx.publish(x_tobesent)
-    puby.publish(y_tobesent)
-
+    return best_path.x , best_path.y , best_path.c ,best_path.ds
     
-
-    '''
-    #path_y = "path_y : %s\n" %path.y
-    rospy.loginfo(path_x)
-    #rospy.loginfo(path_y)
-    x_tobesent=Float32MultiArray()
-    x_tobesent.data=path.x
-    #y_tobesent=Float32MultiArray()
-    #y_tobesent.data=path.y
-    pubx.publish(x_tobesent)
-    #pub.publish(y_tobesent)
-    '''
-
-
-def main():
-    print(__file__ + " start!!")
-
-    # way points
-    wx = [0.0, 10.0, 20.5, 35.0, 70.5, 100.0]
-    wy = [0.0, -6.0, 5.0, 6.5, 0.0, 5.0]
-    # obstacle lists
-    ob = np.array([[20.0, 10.0],
-                   [30.0, 6.0],
-                   [30.0, 8.0],
-                   [35.0, 8.0],
-                   [50.0, 3.0]
-                   ])
-
-    tx, ty, tyaw, tc, csp = generate_target_course(wx, wy)
-
-    # initial state
-    c_speed = 10.0 / 3.6  # current speed [m/s]
-    c_d = 2.0  # current lateral position [m]
-    c_d_d = 0.0  # current lateral speed [m/s]
-    c_d_dd = 0.0  # current lateral acceleration [m/s]
-    s0 = 0.0  # current course position
-
-    area = 20.0  # animation area length [m]
-
-    for i in range(SIM_LOOP):
-        path = frenet_optimal_planning(
-            csp, s0, c_speed, c_d, c_d_d, c_d_dd, ob)
-
-        frenet(path)
-        #print(path.y)
-        s0 = path.s[1]
-        c_d = path.d[1]
-        c_d_d = path.d_d[1]
-        c_d_dd = path.d_dd[1]
-        c_speed = path.s_d[1]
-
-        if np.hypot(path.x[1] - tx[-1], path.y[1] - ty[-1]) <= 1.0:
-            print("Goal")
-            break
-
-        # if show_animation:  # pragma: no cover
-            # plt.cla()
-            # for stopping simulation with the esc key.
-            # plt.gcf().canvas.mpl_connect(
-                # 'key_release_event',
-                # lambda event: [exit(0) if event.key == 'escape' else None])
-            # plt.plot(tx, ty)
-            # plt.plot(ob[:, 0], ob[:, 1], "xk")
-            # plt.plot(path.x[1:], path.y[1:], "-or")
-            # plt.plot(path.x[1], path.y[1], "vc")
-            # plt.xlim(path.x[1] - area, path.x[1] + area)
-            # plt.ylim(path.y[1] - area, path.y[1] + area)
-            # plt.title("v[km/h]:" + str(c_speed * 3.6)[0:4])
-            # plt.grid(True)
-            # plt.pause(0.0001)
-    print("Finish")
-    '''
-    if show_animation:  # pragma: no cover
-        plt.grid(True)
-        plt.pause(0.0001)
-        plt.show()
-'''
-
-
-
-        
-
-if __name__ == '__main__':
-    try:
-        main()
-    except rospy.ROSInterruptException:
-        pass

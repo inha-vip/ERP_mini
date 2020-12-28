@@ -3,11 +3,17 @@
 
 import math
 import time
+from nav_msgs.msg import Odometry
+import rospy
+
 
 class GetVelocity:
     def __init__(self,  master):
         self.control_data = master.control_data
-        
+        self.vel_msg = Odometry()
+        self.vel_pub = rospy.Publisher('/Vel', Odometry, queue_size=1)
+        # rate = rospy.Rate(50) 
+
     def calculate(self,  delta_tick, delta_time):
         # n = data
         # N= 152
@@ -31,6 +37,8 @@ class GetVelocity:
         # print('from getvelocity.py  rpm:', delta_tick/(256*12)/delta_time *60)
         # print('from getvelocity.py  delta_time:', delta_time)
         # print('from getvelocity.py  vel:', output * 3.6)
+        self.vel_msg.pose.pose.position.x  =  output
+        self.vel_pub.publish(self.vel_msg)
         return output
 
     
@@ -63,9 +71,11 @@ class GetVelocity:
 
     def run_vel(self):
         # 쓰레드 종료될때까지 계속 돌림
+        print('get velocity on')
         old_tick = 0
         tmp_tick = 0
         last_delta = 0
+        s_delta = 0
         while not self.control_data['exitThread']:
             #데이터가 있있다면
             start_time = time.time()
@@ -82,6 +92,7 @@ class GetVelocity:
                   tick = mini[-2:-1] + mini[-3:-2]
                   # print('mini tick: ', tick)
                   # print('tick[0]', tick[0])
+                  #if self.control_data['line'][1] is 83:
                   if len(tick) >= 2: 
                       if tick[0] < 256 :
                         tmp_tick = tick[0] * 256 + tick[1]
@@ -90,14 +101,19 @@ class GetVelocity:
                         # print('dt:',  delta_time)
                       #   start_time = time.time()                       
                         delta_tick = tmp_tick - old_tick
+                        if delta_tick < 0:
+                          s_delta = delta_tick + 256*256
+                        else:
+                          s_delta = delta_tick  
                         if(abs(delta_tick) > 500):
-                          print("error")
+                          # print("error")
                           delta_tick = last_delta
                         else:
-                          last_delta = delta_tick
-
-                        print("temp v : ", tmp_tick, " : ", old_tick)
-                        print("original : ", delta_tick)
+                          last_delta = s_delta
+                        #print(delta_tick)
+                        #print(self.control_data['line'])
+                        # print("temp v : ", tmp_tick, " : ", old_tick)
+                        # print("original : ", delta_tick)
                         #print(self.control_data['line'])
                       #   print('d tic:', delta_tick)
                         old_tick = tmp_tick
